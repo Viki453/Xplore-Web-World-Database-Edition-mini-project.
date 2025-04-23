@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Friend List</title>
+  </head>
+  <body>
+    <h1>Friend List</h1>
+    <table id="friendTable" cellpadding="10" border="1">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <br /><a href="/addFriend">➕ Add Another Friend</a>
+
+    <script>
+      async function loadFriends() {
+        const res = await fetch("/api/friends");
+        const data = await res.json();
+        const tbody = document.querySelector("#friendTable tbody");
+        tbody.innerHTML = "";
+
+        data.forEach((friend) => {
+          const row = `
+          <tr>
+            <td>${friend.fid}</td>
+            <td>${friend.fname}</td>
+            <td>${friend.fmail}</td>
+            <td>${friend.fphone}</td>
+            <td>
+              <button onclick="updateFriend(${friend.fid})">Edit</button>
+              <button onclick="deleteFriend(${friend.fid})">Delete</button>
+            </td>
+          </tr>`;
+          tbody.innerHTML += row;
+        });
+      }
+
+      function deleteFriend(fid) {
+        fetch(`/remove/${fid}`, {
+          method: "DELETE",
+        }).then(() => {
+          alert("Deleted!");
+          loadFriends();
+        });
+      }
+
+      function updateFriend(fid) {
+        const name = prompt("New name:");
+        const email = prompt("New email:");
+        const phone = prompt("New phone:");
+
+        fetch(`/UpdateFriend/${fid}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ Name: name, Email: email, Phone: phone }),
+        })
+          .then((res) => res.json())
+          .then(() => {
+            alert("Updated!");
+            loadFriends();
+          });
+      }
+
+      loadFriends();
+    </script>
+  </body>
+</html>
